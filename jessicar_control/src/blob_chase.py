@@ -15,61 +15,10 @@ Listens to /dkcar/control/cmd_vel for corrective actions to the /cmd_vel coming 
 import rospy
 from geometry_msgs.msg import Twist
 import time
-from myutil import clamp, clampRem, PCA9685
-
-STEER_CENTER=380
-STEER_LIMIT = 110
-
-class PWMThrottle:
-    """
-    Wrapper over a PWM motor cotroller to convert -1 to 1 throttle
-    values to PWM pulses.
-    """
-    MIN_THROTTLE = -1
-    MAX_THROTTLE =  1
-
-    def __init__(self, controller=None,
-                       max_pulse=4095,
-                       min_pulse=-4095,
-                       zero_pulse=0):
-
-        self.controller = controller
-        self.max_pulse = max_pulse
-        self.min_pulse = min_pulse
-        self.zero_pulse = zero_pulse
-
-        #send zero pulse to calibrate ESC
-        print("Init ESC")
-        self.controller.set_pulse(self.zero_pulse)
-        time.sleep(1)
-
-
-    def run(self, throttle):
-        pulse = int(throttle)         
-        if throttle > 0:         
-            self.controller.pwm.set_pwm(self.controller.channel,0,pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+1,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+2,0,4095)
-            self.controller.pwm.set_pwm(self.controller.channel+3,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+4,0,pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+7,0,pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+6,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+5,0,4095)
-        else:
-            self.controller.pwm.set_pwm(self.controller.channel,0,-pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+2,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+1,0,4095)
-            self.controller.pwm.set_pwm(self.controller.channel+3,0,-pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+4,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+7,0,-pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+5,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+6,0,4095)
-
-    def shutdown(self):
-        self.run(0) #stop vehicle
+from myutil import clamp, PCA9685, PWMThrottle
 
 class ServoConvert:
-    def __init__(self, id=1, center_value=STEER_CENTER, range=STEER_LIMIT*2, direction=1):
+    def __init__(self, id=1, center_value=0, range=8192, direction=1):
         self.value = 0.0
         self.value_out = center_value
         self._center = center_value
@@ -104,35 +53,37 @@ class DkLowLevelCtrl:
         # --- Initialize the node
         rospy.init_node("blob_chase_node")
 
-        #waveshare throttle is channel 0 on 0x60
-        throttle_controller = PCA9685(channel=0, address=0x60, busnum=1)
-        self._throttle = PWMThrottle(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
-        rospy.loginfo("Throttle Controler Awaked!!")
-        
+        STEER_CENTER = rospy.get_param("/steer_center") 
+        STEER_LIMIT = rospy.get_param("/steer_limit")
+        STEER_DIR = rospy.get_param("/steer_dir")
+        SPEED_CENTER = rospy.get_param("/speed_center") 
+        SPEED_LIMIT = rospy.get_param("/speed_limit")   
+
         #waveshare steering is channel 0 on 0x40
         self._steering_servo = PCA9685(channel=0, address=0x40, busnum=1)
         rospy.loginfo("Steering Controler Awaked!!")
 
+        #waveshare throttle is channel 0 on 0x60
+        throttle_controller = PCA9685(channel=0, address=0x60, busnum=1)
+        self._throttle = PWMThrottle(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
+        rospy.loginfo("Throttle Controler Awaked!!")
+
         self.actuators = {}
-        self.actuators["throttle"] = ServoConvert(
-            id=1, center_value=0, range=8190, direction=1
-        )
-        self.actuators["steering"] = ServoConvert(
-            id=2, center_value=STEER_CENTER, range=STEER_LIMIT*2, direction=1
-        )  # -- positive left
+        self.actuators["throttle"] = ServoConvert(id=1, center_value=SPEED_CENTER, range=SPEED_LIMIT*2, direction=1)
+        self.actuators["steering"] = ServoConvert(id=2, center_value=STEER_CENTER, range=STEER_LIMIT*2, direction=1)  # -- positive left
         rospy.loginfo("> Actuators corrrectly initialized")
 
         # --- Create a debug publisher for resulting cmd_vel
-        self.ros_pub_debug_command = rospy.Publisher(
-            "/dkcar/debug/cmd_vel", Twist, queue_size=1
-        )
-        rospy.loginfo("> Publisher corrrectly initialized")
+        #self.ros_pub_debug_command = rospy.Publisher(
+        #    "/dkcar/debug/cmd_vel", Twist, queue_size=1
+        #)
+        #rospy.loginfo("> Publisher corrrectly initialized")
 
         # --- Create the Subscriber to Twist commands
-        self.ros_sub_twist = rospy.Subscriber(
-            "/cmd_vel", Twist, self.update_message_from_command
-        )
-        rospy.loginfo("> Subscriber corrrectly initialized")
+        #self.ros_sub_twist = rospy.Subscriber(
+        #    "/cmd_vel", Twist, self.update_message_from_command
+        #)
+        #rospy.loginfo("> Subscriber corrrectly initialized")
 
         # --- Create the Subscriber to obstacle_avoidance commands
         self.ros_sub_twist = rospy.Subscriber(
@@ -187,7 +138,6 @@ class DkLowLevelCtrl:
         # rospy.loginfo("Got a command v = %2.1f  s = %2.1f"%(throttle, steering))
 
         self.set_pwm_pulse(self.actuators["throttle"].value_out, self.actuators["steering"].value_out)
-
         print( "throttle: " + str(self.actuators["throttle"].value_out) +  ", steering: " + str(self.actuators["steering"].value_out))
 
 

@@ -1,3 +1,3 @@
 <launch>
-  <node pkg="jessicar_camera" type="webcam_pub.py" name="webcam_pub" output="screen" />
+  <node pkg="jessicar_camera" type="csi_pub.py" name="csi_pub" output="screen" />
 </launch>

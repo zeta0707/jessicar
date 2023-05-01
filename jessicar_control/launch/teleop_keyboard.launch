@@ -1,4 +1,4 @@
 <launch>
   <node pkg="jessicar_control" type="keyboard_control.py" name="keyboard_conttrol" output="screen" />
-  <rosparam command="load" file="$(find jessicar_control)/config/motor.yaml" />
+    <rosparam command="load" file="$(find jessicar_control)/config/motor.yaml" />
 </launch>

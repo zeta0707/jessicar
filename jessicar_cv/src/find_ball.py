@@ -123,27 +123,6 @@ class BlobDetector:
             self._t0 = time.time()
             
 def main(args):
-    # blue_min = (77,40,0)
-    # blue_max = (101, 255, 255) 
-    # blue_min = (82,31,62)
-    # blue_max = (106, 116, 193)     
-    # blue_min = (55,40,0)
-    # blue_max = (150, 255, 255)  
-
-    # white, light blue filter   
-    white_min = (16, 0, 66)
-    white_max = (133, 251, 255)
-    # lblue_min = (59, 45, 112)
-    # lbue_max = (100, 255, 255)   
-    pink_min = (135, 41, 95)
-    pink_max = (255, 196, 255)
-
-    green_min = (39, 81, 71)
-    green_max = (75, 255, 255)
-    
-    orange_min = (7, 109, 50)
-    orange_max = (76, 218, 234)
-
     blur     = 5
     min_size = 10
     max_size = 40
@@ -159,8 +138,8 @@ def main(args):
     params = cv2.SimpleBlobDetector_Params()
          
     # Change thresholds
-    params.minThreshold = 0;
-    params.maxThreshold = 200;
+    params.minThreshold = 0
+    params.maxThreshold = 200
      
     # Filter by Area.
     params.filterByArea = True
@@ -180,7 +159,14 @@ def main(args):
     params.minInertiaRatio = 0.2   
 
     rospy.init_node('blob_detector', anonymous=True)
-    ic = BlobDetector(orange_min, orange_max, blur, params, detection_window)
+
+    blob_min = rospy.get_param("/blob_detector/blob_min")
+    blob_max = rospy.get_param("/blob_detector/blob_max")
+
+    print("blob min", blob_min)
+    print("blob max", blob_max)
+
+    ic = BlobDetector(tuple(blob_min), tuple(blob_max), blur, params, detection_window)
     try:
         rospy.spin()
     except KeyboardInterrupt:

@@ -10,60 +10,10 @@ import time
 import rospy
 from threading import Thread
 from geometry_msgs.msg import Twist
-from myutil import clamp, PCA9685
+from myutil import clamp, PCA9685, PWMThrottle
 
 global speed_pulse
 global steering_pulse
-
-global SPEED_CENTER
-global SPEED_CENTER
-global STEER_CENTER
-global STEER_LIMIT
-global STEER_DIR
-
-class PWMThrottle:
-    """
-    Wrapper over a PWM motor cotnroller to convert -1 to 1 throttle
-    values to PWM pulses.
-    """
-    def __init__(self, controller=None,
-                       max_pulse=4095,
-                       min_pulse=-4095,
-                       zero_pulse=0):
-
-        self.controller = controller
-        self.max_pulse = max_pulse
-        self.min_pulse = min_pulse
-        self.zero_pulse = zero_pulse
-
-        #send zero pulse to calibrate ESC
-        print("Init ESC")
-        self.controller.set_pulse(self.zero_pulse)
-        time.sleep(1)
-
-    def run(self, throttle):
-        pulse = int(throttle)
-        if throttle > 0:
-            self.controller.pwm.set_pwm(self.controller.channel,0,pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+1,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+2,0,4095)
-            self.controller.pwm.set_pwm(self.controller.channel+3,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+4,0,pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+7,0,pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+6,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+5,0,4095)
-        else:
-            self.controller.pwm.set_pwm(self.controller.channel,0,-pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+2,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+1,0,4095)
-            self.controller.pwm.set_pwm(self.controller.channel+3,0,-pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+4,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+7,0,-pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+5,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+6,0,4095)
-
-    def shutdown(self):
-        self.run(0) #stop vehicle
 
 class Vehicle(object):
     def __init__(self, name="Jessicar"):

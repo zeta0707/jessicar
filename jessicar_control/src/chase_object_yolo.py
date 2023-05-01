@@ -18,13 +18,7 @@ from geometry_msgs.msg import Twist
 from darknet_ros_msgs.msg import BoundingBoxes
 from rospy.topics import Message
 
-K_LAT_DIST_TO_STEER = -3.5
-K_LAT_DIST_TO_THROTTLE = 0.15
-
 PICTURE_SIZE = 416.0
-#please change this class for detection
-DETECT_CLASS = "cup"
-#steering sensitivity parameter
 
 def saturate(value, min, max):
     if value <= min:
@@ -80,9 +74,11 @@ class ChaseObject:
 
         if self.is_detected:
             # --- Apply steering, proportional to how close is the object
-            steer_action = -K_LAT_DIST_TO_STEER * self.blob_x
+            steer_action = K_LAT_DIST_TO_STEER * self.blob_x
             steer_action = saturate(steer_action, -1.5, 1.5)
-            #if object is detected, go forward with 20% power
+            rospy.loginfo("BlobX %.2f" % self.blob_x)
+            
+            #if object is detected, go forward with defined power
             throttle_action = K_LAT_DIST_TO_THROTTLE
             rospy.loginfo("is _detected, Steering = %3.1f Throttle = %3.1f" % (steer_action, throttle_action))           
 
@@ -111,6 +107,10 @@ class ChaseObject:
 if __name__ == "__main__":
 
     rospy.init_node("chase_object_yolo")
+    
+    K_LAT_DIST_TO_STEER = rospy.get_param("/k_steer") 
+    K_LAT_DIST_TO_THROTTLE = rospy.get_param("/k_throttle")
+    DETECT_CLASS = rospy.get_param("/DETECT_CLASS")
 
     chase_ball = ChaseObject()
     chase_ball.run()
