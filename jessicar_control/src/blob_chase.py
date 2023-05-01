@@ -15,67 +15,10 @@ Listens to /dkcar/control/cmd_vel for corrective actions to the /cmd_vel coming 
 import rospy
 from geometry_msgs.msg import Twist
 import time
+from myutil import clamp, clampRem, PCA9685
 
 STEER_CENTER=380
 STEER_LIMIT = 110
-
-class PCA9685:
-    """
-    PWM motor controller using PCA9685 boards.
-    This is used for most RC Cars
-    """
-
-    def __init__(
-           self, channel, address, frequency=60, busnum=None, init_delay=0.1
-    ):
-
-        self.default_freq = 60
-        self.pwm_scale = frequency / self.default_freq
-
-        import Adafruit_PCA9685
-
-        # Initialise the PCA9685 using the default address (0x40).
-        if busnum is not None:
-            from Adafruit_GPIO import I2C
-
-            # replace the get_bus function with our own
-            def get_bus():
-                return busnum
-
-            I2C.get_default_bus = get_bus
-        self.pwm = Adafruit_PCA9685.PCA9685(address=address)
-        self.pwm.set_pwm_freq(frequency)
-        self.channel = channel
-        time.sleep(init_delay)  # "Tamiya TBLE-02" makes a little leap otherwise
-
-        self.pulse = STEER_CENTER
-        self.prev_pulse = STEER_CENTER
-        self.running = True
-
-    def set_pwm(self, pulse):
-        try:
-            self.pwm.set_pwm(self.channel, 0, int(pulse * self.pwm_scale))
-        except:
-            self.pwm.set_pwm(self.channel, 0, int(pulse * self.pwm_scale))
-
-    def run(self, pulse):
-        pulse_diff = pulse - self.prev_pulse
-
-        if abs(pulse_diff) > 40:
-            if pulse_diff > 0:
-                pulse += 0.7 * pulse_diff
-            else:
-                pulse -= 0.7 * pulse_diff
-
-        self.set_pwm(pulse)
-        self.prev_pulse = pulse
-
-    def set_pulse(self, pulse):
-        self.pulse = pulse
-
-    def update(self):
-        while self.running:
-            self.set_pulse(self.pulse)
 
 class PWMThrottle:
     """
@@ -252,7 +195,6 @@ class DkLowLevelCtrl:
         self._throttle.run(speed_pulse)
         self._steering_servo.run(steering_pulse)
 
-
     def set_actuators_idle(self):
         # -- Convert vel into servo values
         self.throttle_cmd = 0.0
@@ -261,7 +203,7 @@ class DkLowLevelCtrl:
     def reset_avoid(self):
         self.throttle_chase = 0.0
         self.steer_avoid = 0.0
-
+        
     @property
     def is_controller_connected(self):
         # print time.time() - self._last_time_cmd_rcv

@@ -2,8 +2,7 @@
 
 ## Waveshare Jetracer with ROS Molodic + Donkeycar!!
 
-로드밸런스팀 김수영씨 아래 코드를 가져와서 수정해서 만들었습니다.
-
+로드밸런스팀 김수영씨 아래 코드를 가져와서 수정해서 만들었습니다.   
 https://github.com/Road-Balance/donkey_ros
 
 <p align="center">
@@ -42,27 +41,23 @@ But, It's written in Korean. Anyway, Here's the link
 ```
 
 ## Prerequisite
-
-1. Ros Packages installation
-   
-```bash
-$ sudo apt-get install ros-melodic-cv-bridge
-$ sudo apt-get install ros-melodic-image-view
-```
-
-2. OpenCV4 installation
-
-- Can be found in [JetsonHacks repo](https://github.com/JetsonHacksNano/buildOpenCV)
-
-3. Clone this Repo
+Clone these Repo
 
 ```bash
 $ cd ~/catkin_ws/src
-$ git clone https://github.com/Road-Balance/donkey_ros.git
 
-$ cd ../
-$ catkin_make
-$ source devel/setup.bash
+Keyboard teleop   
+$ git clone https://github.com/ros-teleop/teleop_twist_keyboard.git   
+
+Jessicar project code   
+$ git clone https://github.com/zeta0707/jessicar.git   
+
+Custom Yolo4 train    
+$ git clone https://github.com/zeta0707/darknet_ros_custom.git
+
+git clone https://github.com/ros-drivers/gscam.git
+git clone --recursive https://github.com/Tossy0423/yolov4-for-darknet_ros.git
+
 ```
 
 ## Usage
@@ -182,7 +177,7 @@ $ roscore
 $ rosrun teleop_twist_keyboard teleop_twist_keyboard.py
 
 # Laptop or Jetson
-$ roslaunch donkey_joy joy_teleop_axes.launch
+$ roslaunch jessicar_joy joy_teleop_axes.launch
 
 ```
 

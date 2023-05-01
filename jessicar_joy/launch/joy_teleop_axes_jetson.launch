@@ -1,13 +1,11 @@
 <launch>
   <arg name="racecar_version" />
   <arg name="joy_teleop_config"
-       default="$(find jessiarm_joy)/config/joy_teleop.yaml" />
+       default="$(find jessicar_joy)/config/joy_teleop.yaml" />
 
   <rosparam file="$(arg joy_teleop_config)" command="load" />
 
   <node pkg="joy" type="joy_node" name="joy_node" />
-
-  <node pkg="jessiarm_joy" type="joy_teleop_axes.py" name="joy_teleop_axes" />
-
-  <node pkg="jessiarm_control" type="joy_control.py" name="joy_control" output="screen" />
+  <node pkg="jessicar_joy" type="joy_teleop_axes.py" name="joy_teleop_axes" />
+  <node pkg="jessicar_control" type="joy_control.py" name="joy_control" output="screen" />
 </launch>

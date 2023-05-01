@@ -1,0 +1,14 @@
+<launch>
+  <!-- keyboard teleoperation node for robot -->
+  <arg name="set_multi_robot_name" default=""/>
+
+  <node pkg="jessicar_teleop" type="jessicar_teleop_key.py" name="jessicar_teleop_keyboard"  output="screen">
+    <param name="max_lin_vel" value="1.0" />
+    <param name="max_ang_vel" value="1.0" />
+    <param name="min_lin_vel" value="-1.0" />
+    <param name="lin_vel_step" value="0.2" />
+    <param name="ang_vel_step" value="0.2" />
+    <param name="ang_vel_reverse" value="0" />
+    <param name="tf_prefix" value="$(arg set_multi_robot_name)"/>
+  </node>
+</launch>

@@ -14,8 +14,6 @@ define: &red_max [255, 255, 255]
 blob_detector:
   blob_min: *red_min
   blob_max: *red_max
-jessiarm_speed:
-  SCAN_SPEED: 0.04
 
 
 

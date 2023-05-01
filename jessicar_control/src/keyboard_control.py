@@ -10,72 +10,16 @@ import time
 import rospy
 from threading import Thread
 from geometry_msgs.msg import Twist
+from myutil import clamp, PCA9685
 
-STEER_CENTER = 380
-STEER_STEP = -10
-STEER_LIMIT = 100
-SPEED_STEP = 1024
+global speed_pulse
+global steering_pulse
 
-speed_pulse = 0
-steering_pulse = STEER_CENTER
-
-class PCA9685:
-    """
-    PWM motor controler using PCA9685 boards.
-    This is used for most RC Cars
-    """
-
-    def __init__(
-           self, channel, address, frequency=60, busnum=None, init_delay=0.1
-    ):
-
-        self.default_freq = 60
-        self.pwm_scale = frequency / self.default_freq
-
-        import Adafruit_PCA9685
-
-        # Initialise the PCA9685 using the default address (0x40).
-        if busnum is not None:
-            from Adafruit_GPIO import I2C
-
-            # replace the get_bus function with our own
-            def get_bus():
-                return busnum
-
-            I2C.get_default_bus = get_bus
-        self.pwm = Adafruit_PCA9685.PCA9685(address=address)
-        self.pwm.set_pwm_freq(frequency)
-        self.channel = channel
-        time.sleep(init_delay)  # "Tamiya TBLE-02" makes a little leap otherwise
-
-        self.pulse = STEER_CENTER
-        self.prev_pulse = STEER_CENTER
-        self.running = True
-
-    def set_pwm(self, pulse):
-        try:
-            self.pwm.set_pwm(self.channel, 0, int(pulse * self.pwm_scale))
-        except:
-            self.pwm.set_pwm(self.channel, 0, int(pulse * self.pwm_scale))
-
-    def run(self, pulse):
-        pulse_diff = pulse - self.prev_pulse
-
-        if abs(pulse_diff) > 40:
-            if pulse_diff > 0:
-                pulse += 0.7 * pulse_diff
-            else:
-                pulse -= 0.7 * pulse_diff
-
-        self.set_pwm(pulse)
-        self.prev_pulse = pulse
-
-    def set_pulse(self, pulse):
-        self.pulse = pulse
-
-    def update(self):
-        while self.running:
-            self.set_pulse(self.pulse)
+global SPEED_CENTER
+global SPEED_CENTER
+global STEER_CENTER
+global STEER_LIMIT
+global STEER_DIR
 
 class PWMThrottle:
     """
@@ -96,7 +40,6 @@ class PWMThrottle:
         print("Init ESC")
         self.controller.set_pulse(self.zero_pulse)
         time.sleep(1)
-
 
     def run(self, throttle):
         pulse = int(throttle)
@@ -144,26 +87,16 @@ class Vehicle(object):
 
     def keyboard_callback(self, msg):
 
-        global speed_pulse
-        global steering_pulse
-        rospy.loginfo("Received a /cmd_vel message!")
-        rospy.loginfo("Linear Components: [%f, %f, %f]"%(msg.linear.x, msg.linear.y, msg.linear.z))
-        rospy.loginfo("Angular Components: [%f, %f, %f]"%(msg.angular.x, msg.angular.y, msg.angular.z))
+        #rospy.loginfo("Received a /cmd_vel message!")
+        rospy.loginfo("Components: [%0.2f, %0.2f]"%(msg.linear.x, msg.angular.z))
 
         # Do velocity processing here:
         # Use the kinematics of your robot to map linear and angular velocities into motor commands
-        speed_pulse += msg.linear.x*SPEED_STEP
+        speed_pulse = SPEED_CENTER + msg.linear.x*SPEED_LIMIT 
+        speed_pulse = clamp(speed_pulse, -SPEED_LIMIT, SPEED_LIMIT)
 
-        if speed_pulse > 4095 :
-           speed_pulse = 4095
-        if speed_pulse < -4095 :
-           speed_pulse = -4095       
-
-        steering_pulse += msg.angular.z*STEER_STEP
-        if steering_pulse > (STEER_CENTER + STEER_LIMIT) :
-           steering_pulse = STEER_CENTER + STEER_LIMIT
-        if steering_pulse < (STEER_CENTER - STEER_LIMIT) :
-           steering_pulse = STEER_CENTER - STEER_LIMIT
+        steering_pulse = STEER_CENTER + msg.angular.z*STEER_LIMIT*STEER_DIR
+        steering_pulse = clamp(steering_pulse, STEER_CENTER - STEER_LIMIT, STEER_CENTER + STEER_LIMIT)
 
         print(
             "speed_pulse : "
@@ -179,7 +112,14 @@ class Vehicle(object):
 
 if __name__ == "__main__":
 
-    rospy.init_node("jessicar_control")
+    rospy.init_node("jessicar_control", anonymous=True)
+
+    STEER_CENTER = rospy.get_param("/steer_center") 
+    STEER_LIMIT = rospy.get_param("/steer_limit")
+    STEER_DIR = rospy.get_param("/steer_dir")
+    SPEED_CENTER = rospy.get_param("/speed_center") 
+    SPEED_LIMIT = rospy.get_param("/speed_limit")   
+
     myCar = Vehicle("Jessicar")
 
     rate = rospy.Rate(10)

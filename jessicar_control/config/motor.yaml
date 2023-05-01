@@ -1,0 +1,9 @@
+define: &motorPins [55,40,0]
+
+steer_center : 380
+steer_limit : 100
+steer_dir : -1
+speed_center: 0
+speed_limit: 4095
+
+
