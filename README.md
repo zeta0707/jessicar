@@ -1,6 +1,6 @@
 # ROS1 Donkey(제시카)
 
-## Waveshare Jetracer with ROS Molodic + Donkeycar!!
+## RCCar with ROS Molodic + Donkeycar!!
 
 로드밸런스팀 김수영씨 아래 코드를 가져와서 수정해서 만들었습니다.   
 https://github.com/Road-Balance/donkey_ros

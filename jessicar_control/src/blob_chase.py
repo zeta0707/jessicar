@@ -53,20 +53,27 @@ class DkLowLevelCtrl:
         # --- Initialize the node
         rospy.init_node("blob_chase_node")
 
+        self.hasSteer = rospy.get_param("/has_steer") 
         STEER_CENTER = rospy.get_param("/steer_center") 
         STEER_LIMIT = rospy.get_param("/steer_limit")
         STEER_DIR = rospy.get_param("/steer_dir")
         SPEED_CENTER = rospy.get_param("/speed_center") 
         SPEED_LIMIT = rospy.get_param("/speed_limit")   
 
-        #waveshare steering is channel 0 on 0x40
-        self._steering_servo = PCA9685(channel=0, address=0x40, busnum=1)
-        rospy.loginfo("Steering Controler Awaked!!")
+        if self.hasSteer == 1:
+            #steering
+            self._steering_servo = PCA9685(channel=0, address=0x40, busnum=1)
+            rospy.loginfo("Steering Controler Awaked!!")
 
-        #waveshare throttle is channel 0 on 0x60
-        throttle_controller = PCA9685(channel=0, address=0x60, busnum=1)
-        self._throttle = PWMThrottle(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
-        rospy.loginfo("Throttle Controler Awaked!!")
+            #throttle
+            throttle_controller = PCA9685(channel=0, address=0x60, busnum=1)
+            self._throttle = PWMThrottle(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
+            rospy.loginfo("Throttle Controler Awaked!!")
+        else: 
+            throttle_controller = PCA9685(channel=0, address=0x40, busnum=1)
+            self._throttle = PWMThrottle2Wheel(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
+            rospy.loginfo("Throttle Controler Awaked!!")
+           
 
         self.actuators = {}
         self.actuators["throttle"] = ServoConvert(id=1, center_value=SPEED_CENTER, range=SPEED_LIMIT*2, direction=1)
@@ -142,8 +149,11 @@ class DkLowLevelCtrl:
 
 
     def set_pwm_pulse(self, speed_pulse, steering_pulse):
-        self._throttle.run(speed_pulse)
-        self._steering_servo.run(steering_pulse)
+        if self.hasSteer == 1:
+            self._throttle.run(speed_pulse)
+            self._steering_servo.run(steering_pulse)
+        else:
+            self._throttle.run(speed_pulse, steering_pulse)
 
     def set_actuators_idle(self):
         # -- Convert vel into servo values

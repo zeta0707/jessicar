@@ -35,7 +35,7 @@ class PCA9685:
         self.pwm = Adafruit_PCA9685.PCA9685(address=address)
         self.pwm.set_pwm_freq(frequency)
         self.channel = channel
-        time.sleep(init_delay)  # "Tamiya TBLE-02" makes a little leap otherwise
+        #time.sleep(init_delay)  # "Tamiya TBLE-02" makes a little leap otherwise
         self.running = True
 
     def set_pwm(self, pulse):
@@ -97,6 +97,88 @@ class PWMThrottle:
             self.controller.pwm.set_pwm(self.controller.channel+7,0,-pulse)
             self.controller.pwm.set_pwm(self.controller.channel+5,0,0)
             self.controller.pwm.set_pwm(self.controller.channel+6,0,4095)
+
+    def shutdown(self):
+        self.run(0) #stop vehicle
+
+class PWMThrottle2Wheel:
+    """
+    Wrapper over a PWM motor cotnroller to convert -1 to 1 throttle
+    values to PWM pulses.
+    """
+    def __init__(self, controller=None,
+                       max_pulse=4095,
+                       min_pulse=-4095,
+                       zero_pulse=0):
+
+        self.controller = controller
+        self.max_pulse = max_pulse
+        self.min_pulse = min_pulse
+        self.zero_pulse = zero_pulse
+
+        #send zero pulse to calibrate ESC
+        print("Init ESC")
+        self.controller.set_pulse(self.zero_pulse)
+        time.sleep(1)
+
+
+    def run(self, throttle, steering):
+        left_motor_speed = throttle
+        right_motor_speed = throttle
+
+        if steering < 0:
+            left_motor_speed *= (1.0 - (-steering/4095)) 
+        elif steering > 0:
+            right_motor_speed *= (1.0 - (steering/4095))
+
+        left_pulse = int(left_motor_speed)   
+        right_pulse = int(right_motor_speed)
+
+        print(
+            "left_pulse : "
+            + str(left_pulse)
+            + " / "
+            + "right_pulse : "
+            + str(right_pulse)
+        )
+
+        if left_motor_speed > 0:
+            #rear motor
+            self.controller.pwm.set_pwm(self.controller.channel+ 5,0,left_pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+ 4,0,0)
+            self.controller.pwm.set_pwm(self.controller.channel+ 3,0,4095)
+            #front motor
+            self.controller.pwm.set_pwm(self.controller.channel+ 6,0,left_pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+ 7,0,4095)
+            self.controller.pwm.set_pwm(self.controller.channel+ 8,0,0)
+        else:
+            #rear motor
+            self.controller.pwm.set_pwm(self.controller.channel+ 5,0,-left_pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+ 3,0,0)
+            self.controller.pwm.set_pwm(self.controller.channel+ 4,0,4095)
+            #front motor
+            self.controller.pwm.set_pwm(self.controller.channel+ 6,0,-left_pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+ 8,0,4095)
+            self.controller.pwm.set_pwm(self.controller.channel+ 7,0,0)
+
+        if right_motor_speed > 0:
+            #rear motor
+            self.controller.pwm.set_pwm(self.controller.channel+ 0,0,right_pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+ 2,0,0) 
+            self.controller.pwm.set_pwm(self.controller.channel+ 1,0,4095)
+            #front motor
+            self.controller.pwm.set_pwm(self.controller.channel+11,0,right_pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+ 9,0,4095)
+            self.controller.pwm.set_pwm(self.controller.channel+10,0,0)
+        else:
+            #rear motor
+            self.controller.pwm.set_pwm(self.controller.channel+ 0,0,-right_pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+ 1,0,0) 
+            self.controller.pwm.set_pwm(self.controller.channel+ 2,0,4095)
+            #front motor
+            self.controller.pwm.set_pwm(self.controller.channel+11,0,-right_pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+10,0,4095)
+            self.controller.pwm.set_pwm(self.controller.channel+ 9,0,0)
 
     def shutdown(self):
         self.run(0) #stop vehicle

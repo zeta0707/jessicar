@@ -18,12 +18,17 @@ global steering_pulse
 class Vehicle(object):
     def __init__(self, name="Jessicar"):
         
-        self._steering_servo = PCA9685(channel=0, address=0x40, busnum=1)
-        rospy.loginfo("Steering Controller Awaked!!")
+        if hasSteer == 1:
+            self._steering_servo = PCA9685(channel=0, address=0x40, busnum=1)
+            rospy.loginfo("Steering Controller Awaked!!")
 
-        throttle_controller = PCA9685(channel=0, address=0x60, busnum=1)
-        self._throttle = PWMThrottle(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
-        rospy.loginfo("Throttle Controller Awaked!!") 
+            throttle_controller = PCA9685(channel=0, address=0x60, busnum=1)
+            self._throttle = PWMThrottle(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
+            rospy.loginfo("Throttle Controller Awaked!!") 
+        else:
+            throttle_controller = PCA9685(channel=0, address=0x40, busnum=1)
+            self._throttle = PWMThrottle2Wheel(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
+            rospy.loginfo("2wheel Throttle Controller Awaked!!")         
         
         self._name = name
         self._teleop_sub = rospy.Subscriber(
@@ -56,20 +61,24 @@ class Vehicle(object):
             + str(steering_pulse)
         )
 
-        self._throttle.run(speed_pulse)
-        self._steering_servo.run(steering_pulse)
+        if hasSteer == 1:
+            self._throttle.run(speed_pulse)
+            self._steering_servo.run(steering_pulse)
+        else:
+            self._throttle.run(speed_pulse,steering_pulse)
 
 
 if __name__ == "__main__":
 
-    rospy.init_node("jessicar_control", anonymous=True)
+    rospy.init_node("jessicar_control")
 
     STEER_CENTER = rospy.get_param("/steer_center") 
     STEER_LIMIT = rospy.get_param("/steer_limit")
     STEER_DIR = rospy.get_param("/steer_dir")
     SPEED_CENTER = rospy.get_param("/speed_center") 
     SPEED_LIMIT = rospy.get_param("/speed_limit")   
-
+    hasSteer = rospy.get_param("/has_steer") 
+    
     myCar = Vehicle("Jessicar")
 
     rate = rospy.Rate(10)
