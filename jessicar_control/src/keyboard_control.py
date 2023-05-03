@@ -10,7 +10,7 @@ import time
 import rospy
 from threading import Thread
 from geometry_msgs.msg import Twist
-from myutil import clamp, PCA9685, PWMThrottle
+from myutil import clamp, PCA9685, PWMThrottle, PWMThrottle2Wheel
 
 global speed_pulse
 global steering_pulse
@@ -53,13 +53,22 @@ class Vehicle(object):
         steering_pulse = STEER_CENTER + msg.angular.z*STEER_LIMIT*STEER_DIR
         steering_pulse = clamp(steering_pulse, STEER_CENTER - STEER_LIMIT, STEER_CENTER + STEER_LIMIT)
 
-        print(
-            "speed_pulse : "
-            + str(speed_pulse)
-            + " / "
-            + "steering_pulse : "
-            + str(steering_pulse)
-        )
+        if hasSteer == 1:
+            print(
+                "speed_pulse : "
+                + str(speed_pulse)
+                + " / "
+                + "steering_pulse : "
+                + str(steering_pulse)
+            )
+        else:
+             print(
+                "speed_pulse : "
+                + str(speed_pulse)
+                + " / "
+                + "steer % : "
+                + str(steering_pulse*100/STEER_LIMIT)
+            )
 
         if hasSteer == 1:
             self._throttle.run(speed_pulse)

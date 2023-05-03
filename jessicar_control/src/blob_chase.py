@@ -15,7 +15,7 @@ Listens to /dkcar/control/cmd_vel for corrective actions to the /cmd_vel coming 
 import rospy
 from geometry_msgs.msg import Twist
 import time
-from myutil import clamp, PCA9685, PWMThrottle
+from myutil import clamp, PCA9685, PWMThrottle, PWMThrottle2Wheel
 
 class ServoConvert:
     def __init__(self, id=1, center_value=0, range=8192, direction=1):

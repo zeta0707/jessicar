@@ -135,9 +135,9 @@ class PWMThrottle2Wheel:
         right_pulse = int(right_motor_speed)
 
         print(
-            "left_pulse : "
+            "left_pulse  : "
             + str(left_pulse)
-            + " / "
+            + "   / "
             + "right_pulse : "
             + str(right_pulse)
         )

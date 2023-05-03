@@ -9,7 +9,7 @@ import time
 import rospy
 from threading import Thread
 from ackermann_msgs.msg import AckermannDriveStamped
-from myutil import clamp, PCA9685, PWMThrottle
+from myutil import clamp, PCA9685, PWMThrottle, PWMThrottle2Wheel
 
 class Vehicle(object):
     def __init__(self, name="Jessicar"):
@@ -39,13 +39,23 @@ class Vehicle(object):
         speed_pulse = msg.drive.speed
         steering_pulse = msg.drive.steering_angle
 
-        print(
-            "speed_pulse : "
-            + str(speed_pulse)
-            + " / "
-            + "steering_pulse : "
-            + str(steering_pulse)
-        )
+        if hasSteer == 1:
+            print(
+                "speed_pulse : "
+                + str(speed_pulse)
+                + " / "
+                + "steering_pulse : "
+                + str(steering_pulse)
+            )
+        else:
+             print(
+                "speed_pulse : "
+                + str(speed_pulse)
+                + " / "
+                + "steer % : "
+                + str(steering_pulse*100/STEER_LIMIT)
+            )
+
 
         if hasSteer == 1:
             self._throttle.run(speed_pulse)
