@@ -10,7 +10,7 @@ import time
 import rospy
 from threading import Thread
 from geometry_msgs.msg import Twist
-from myutil import clamp, PCA9685, PWMThrottle, PWMThrottle2Wheel, PWMSteering
+from myutil import clamp, PCA9685, PWMThrottle, PWMThrottle2Wheel, PWMThrottleHat, PWMSteering
 
 global speed_pulse
 global steering_pulse
@@ -18,18 +18,27 @@ global steering_pulse
 class Vehicle(object):
     def __init__(self, name="Jessicar"):
         
+        #RCcar which has steering
         if hasSteer == 1:
+            #Steer with DC motor driver 
             if isDCSteer == 1:
                 steer_controller = PCA9685(channel=0, address=i2caddr0, busnum=1)
                 self._steering = PWMSteering(controller=steering_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
-                rospy.loginfo("Steering Controller Awaked!!")
+            #Steer with servo motor
             else:
                 self._steering = PCA9685(channel=0, address=i2caddr0, busnum=1)
-                rospy.loginfo("Steering Controller Awaked!!")                
+            rospy.loginfo("Steering Controller Awaked!!") 
 
+            #Throttle with Motorhat
             throttle_controller = PCA9685(channel=0, address=i2caddr1, busnum=1)
-            self._throttle = PWMThrottle(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
+            if isDCSteer == 1:
+                self._throttle = PWMThrottleHat(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095) 
+            #Throttle with Jetracer
+            else:
+                self._throttle = PWMThrottle(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
             rospy.loginfo("Throttle Controller Awaked!!") 
+            
+        #2wheel RCcar
         else:
             throttle_controller = PCA9685(channel=0, address=i2caddr0, busnum=1)
             self._throttle = PWMThrottle2Wheel(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)

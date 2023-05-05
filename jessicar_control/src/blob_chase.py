@@ -15,7 +15,7 @@ Listens to /dkcar/control/cmd_vel for corrective actions to the /cmd_vel coming 
 import rospy
 from geometry_msgs.msg import Twist
 import time
-from myutil import clamp, PCA9685, PWMThrottle, PWMThrottle2Wheel, PWMSteering
+from myutil import clamp, PCA9685, PWMThrottle, PWMThrottle2Wheel, PWMThrottleHat, PWMSteering
 
 class ServoConvert:
     def __init__(self, id=1, center_value=0, range=8192, direction=1):
@@ -61,26 +61,33 @@ class DkLowLevelCtrl:
         SPEED_LIMIT = rospy.get_param("/speed_limit")   
         i2caddr0 = rospy.get_param("/i2caddr0") 
         i2caddr1 = rospy.get_param("/i2caddr1") 
-        isDCSteer = rospy.get_param("/isDCSteer") 
+        self.isDCSteer = rospy.get_param("/isDCSteer") 
 
+        #RCcar which has steering
         if self.hasSteer == 1:
-            if isDCSteer == 1:
+            #Steer with DC motor driver 
+            if self.isDCSteer == 1:
                 steer_controller = PCA9685(channel=0, address=i2caddr0, busnum=1)
                 self._steering = PWMSteering(controller=steering_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
-                rospy.loginfo("Steering Controller Awaked!!")
+            #Steer with servo motor
             else:
                 self._steering = PCA9685(channel=0, address=i2caddr0, busnum=1)
-                rospy.loginfo("Steering Controller Awaked!!")           
+            rospy.loginfo("Steering Controller Awaked!!") 
 
-            #throttle
+            #Throttle with Motorhat
             throttle_controller = PCA9685(channel=0, address=i2caddr1, busnum=1)
-            self._throttle = PWMThrottle(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
-            rospy.loginfo("Throttle Controler Awaked!!")
-        else: 
+            if self.isDCSteer == 1:               
+                self._throttle = PWMThrottleHat(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
+            #Throttle with Jetracer
+            else:
+                self._throttle = PWMThrottle(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
+            rospy.loginfo("Throttle Controller Awaked!!") 
+            
+        #2wheel RCcar
+        else:
             throttle_controller = PCA9685(channel=0, address=i2caddr0, busnum=1)
             self._throttle = PWMThrottle2Wheel(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
-            rospy.loginfo("Throttle Controler Awaked!!")
-           
+            rospy.loginfo("2wheel Throttle Controller Awaked!!")           
 
         self.actuators = {}
         self.actuators["throttle"] = ServoConvert(id=1, center_value=SPEED_CENTER, range=SPEED_LIMIT*2, direction=1)

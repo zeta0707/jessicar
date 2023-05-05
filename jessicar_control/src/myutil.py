@@ -82,14 +82,14 @@ class PWMSteering:
         pulse = int(steering)
         print("steer : " + str(steering))
         if steering > 0:
-            #Motorhat B 
-            self.controller.pwm.set_pwm(self.controller.channel,5,pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+3,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+4,0,4095)
+            #Motorhat A
+            self.controller.pwm.set_pwm(self.controller.channel,0,pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+1,0,0)
+            self.controller.pwm.set_pwm(self.controller.channel+2,0,4095)
         else:
-            self.controller.pwm.set_pwm(self.controller.channel,5,-pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+3,0,4095)
-            self.controller.pwm.set_pwm(self.controller.channel+4,0,0)
+            self.controller.pwm.set_pwm(self.controller.channel,0,-pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+1,0,4095)
+            self.controller.pwm.set_pwm(self.controller.channel+2,0,0)
 
     def shutdown(self):
         self.run(0) #stop vehicle
@@ -117,15 +117,52 @@ class PWMThrottle:
     def run(self, throttle):
         pulse = int(throttle)
         if throttle > 0:
-            #Jetracer, MotorHat A
-            self.controller.pwm.set_pwm(self.controller.channel,0,pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+1,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+2,0,4095)
+            self.controller.pwm.set_pwm(self.controller.channel+3,0,0)
+            self.controller.pwm.set_pwm(self.controller.channel+4,0,pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+6,0,0)
+            self.controller.pwm.set_pwm(self.controller.channel+5,0,4095)   
         else:
-            self.controller.pwm.set_pwm(self.controller.channel,0,-pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+1,0,4095)
-            self.controller.pwm.set_pwm(self.controller.channel+2,0,0)
+            self.controller.pwm.set_pwm(self.controller.channel+3,0,-pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+4,0,0)
+            self.controller.pwm.set_pwm(self.controller.channel+5,0,0)
+            self.controller.pwm.set_pwm(self.controller.channel+6,0,4095) 
 
+    def shutdown(self):
+        self.run(0) #stop vehicle
+
+class PWMThrottleHat:
+    """
+    Wrapper over a PWM motor cotnroller to convert -1 to 1 throttle
+    values to PWM pulses.
+    """
+    def __init__(self, controller=None,
+                       max_pulse=4095,
+                       min_pulse=-4095,
+                       zero_pulse=0):
+
+        self.controller = controller
+        self.max_pulse = max_pulse
+        self.min_pulse = min_pulse
+        self.zero_pulse = zero_pulse
+
+        #send zero pulse to calibrate ESC
+        print("Init Throttle ESC")
+        self.controller.set_pulse(self.zero_pulse)
+        time.sleep(1)
+
+    def run(self, throttle):
+        pulse = int(throttle)
+        if throttle > 0:   
+            # MotorHat B
+            self.controller.pwm.set_pwm(self.controller.channel+ 5,0,left_pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+ 4,0,0)
+            self.controller.pwm.set_pwm(self.controller.channel+ 3,0,4095)
+
+        else:
+            # MotorHat B
+            self.controller.pwm.set_pwm(self.controller.channel+ 5,0,-left_pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+ 4,0,4095)
+            self.controller.pwm.set_pwm(self.controller.channel+ 3,0,0)
 
     def shutdown(self):
         self.run(0) #stop vehicle
