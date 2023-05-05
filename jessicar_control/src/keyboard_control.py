@@ -10,7 +10,7 @@ import time
 import rospy
 from threading import Thread
 from geometry_msgs.msg import Twist
-from myutil import clamp, PCA9685, PWMThrottle, PWMThrottle2Wheel
+from myutil import clamp, PCA9685, PWMThrottle, PWMThrottle2Wheel, PWMSteering
 
 global speed_pulse
 global steering_pulse
@@ -19,14 +19,19 @@ class Vehicle(object):
     def __init__(self, name="Jessicar"):
         
         if hasSteer == 1:
-            self._steering_servo = PCA9685(channel=0, address=0x40, busnum=1)
-            rospy.loginfo("Steering Controller Awaked!!")
+            if isDCSteer == 1:
+                steer_controller = PCA9685(channel=0, address=i2caddr0, busnum=1)
+                self._steering = PWMSteering(controller=steering_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
+                rospy.loginfo("Steering Controller Awaked!!")
+            else:
+                self._steering = PCA9685(channel=0, address=i2caddr0, busnum=1)
+                rospy.loginfo("Steering Controller Awaked!!")                
 
-            throttle_controller = PCA9685(channel=0, address=0x60, busnum=1)
+            throttle_controller = PCA9685(channel=0, address=i2caddr1, busnum=1)
             self._throttle = PWMThrottle(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
             rospy.loginfo("Throttle Controller Awaked!!") 
         else:
-            throttle_controller = PCA9685(channel=0, address=0x40, busnum=1)
+            throttle_controller = PCA9685(channel=0, address=i2caddr0, busnum=1)
             self._throttle = PWMThrottle2Wheel(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
             rospy.loginfo("2wheel Throttle Controller Awaked!!")         
         
@@ -43,7 +48,7 @@ class Vehicle(object):
     def keyboard_callback(self, msg):
 
         #rospy.loginfo("Received a /cmd_vel message!")
-        rospy.loginfo("Components: [%0.2f, %0.2f]"%(msg.linear.x, msg.angular.z))
+        #rospy.loginfo("Components: [%0.2f, %0.2f]"%(msg.linear.x, msg.angular.z))
 
         # Do velocity processing here:
         # Use the kinematics of your robot to map linear and angular velocities into motor commands
@@ -72,7 +77,7 @@ class Vehicle(object):
 
         if hasSteer == 1:
             self._throttle.run(speed_pulse)
-            self._steering_servo.run(steering_pulse)
+            self._steering.run(steering_pulse)
         else:
             self._throttle.run(speed_pulse,steering_pulse)
 
@@ -87,7 +92,11 @@ if __name__ == "__main__":
     SPEED_CENTER = rospy.get_param("/speed_center") 
     SPEED_LIMIT = rospy.get_param("/speed_limit")   
     hasSteer = rospy.get_param("/has_steer") 
-    
+    isDCSteer = rospy.get_param("/isDCSteer") 
+
+    i2caddr0 = rospy.get_param("/i2caddr0") 
+    i2caddr1 = rospy.get_param("/i2caddr1") 
+
     myCar = Vehicle("Jessicar")
 
     rate = rospy.Rate(10)

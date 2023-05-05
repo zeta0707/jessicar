@@ -57,6 +57,43 @@ class PCA9685:
         while self.running:
             self.set_pulse(self.pulse)     
 
+class PWMSteering:
+    """
+    Wrapper over a PWM motor controller to convert -1 to 1 throttle
+    values to PWM pulses.
+    """
+    def __init__(self, controller=None,
+                       max_pulse=4095,
+                       min_pulse=-4095,
+                       zero_pulse=0):
+
+        self.controller = controller
+        self.max_pulse = max_pulse
+        self.min_pulse = min_pulse
+        self.zero_pulse = zero_pulse
+
+        #send zero pulse to calibrate ESC
+        print("Init Steer ESC")
+        self.controller.set_pulse(self.zero_pulse)
+        time.sleep(1)
+
+
+    def run(self, steering):
+        pulse = int(steering)
+        print("steer : " + str(steering))
+        if steering > 0:
+            #Motorhat B 
+            self.controller.pwm.set_pwm(self.controller.channel,5,pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+3,0,0)
+            self.controller.pwm.set_pwm(self.controller.channel+4,0,4095)
+        else:
+            self.controller.pwm.set_pwm(self.controller.channel,5,-pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+3,0,4095)
+            self.controller.pwm.set_pwm(self.controller.channel+4,0,0)
+
+    def shutdown(self):
+        self.run(0) #stop vehicle
+
 class PWMThrottle:
     """
     Wrapper over a PWM motor cotnroller to convert -1 to 1 throttle
@@ -73,30 +110,22 @@ class PWMThrottle:
         self.zero_pulse = zero_pulse
 
         #send zero pulse to calibrate ESC
-        print("Init ESC")
+        print("Init Throttle ESC")
         self.controller.set_pulse(self.zero_pulse)
         time.sleep(1)
 
     def run(self, throttle):
         pulse = int(throttle)
         if throttle > 0:
+            #Jetracer, MotorHat A
             self.controller.pwm.set_pwm(self.controller.channel,0,pulse)
             self.controller.pwm.set_pwm(self.controller.channel+1,0,0)
             self.controller.pwm.set_pwm(self.controller.channel+2,0,4095)
-            self.controller.pwm.set_pwm(self.controller.channel+3,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+4,0,pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+7,0,pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+6,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+5,0,4095)
         else:
             self.controller.pwm.set_pwm(self.controller.channel,0,-pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+2,0,0)
             self.controller.pwm.set_pwm(self.controller.channel+1,0,4095)
-            self.controller.pwm.set_pwm(self.controller.channel+3,0,-pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+4,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+7,0,-pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+5,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+6,0,4095)
+            self.controller.pwm.set_pwm(self.controller.channel+2,0,0)
+
 
     def shutdown(self):
         self.run(0) #stop vehicle
@@ -117,7 +146,7 @@ class PWMThrottle2Wheel:
         self.zero_pulse = zero_pulse
 
         #send zero pulse to calibrate ESC
-        print("Init ESC")
+        print("Init ESC 2Wheel")
         self.controller.set_pulse(self.zero_pulse)
         time.sleep(1)
 
@@ -142,43 +171,50 @@ class PWMThrottle2Wheel:
             + str(right_pulse)
         )
 
+        self.controller.pwm.set_pwm(self.controller.channel+15,0,0)             #BRK for BLDC driver
+
         if left_motor_speed > 0:
             #rear motor
+            #1st L298N, Motorhat B
             self.controller.pwm.set_pwm(self.controller.channel+ 5,0,left_pulse)
             self.controller.pwm.set_pwm(self.controller.channel+ 4,0,0)
             self.controller.pwm.set_pwm(self.controller.channel+ 3,0,4095)
-            #front motor
-            self.controller.pwm.set_pwm(self.controller.channel+ 6,0,left_pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+ 7,0,4095)
-            self.controller.pwm.set_pwm(self.controller.channel+ 8,0,0)
-        else:
-            #rear motor
-            self.controller.pwm.set_pwm(self.controller.channel+ 5,0,-left_pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+ 3,0,0)
-            self.controller.pwm.set_pwm(self.controller.channel+ 4,0,4095)
-            #front motor
-            self.controller.pwm.set_pwm(self.controller.channel+ 6,0,-left_pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+ 8,0,4095)
-            self.controller.pwm.set_pwm(self.controller.channel+ 7,0,0)
-
-        if right_motor_speed > 0:
-            #rear motor
-            self.controller.pwm.set_pwm(self.controller.channel+ 0,0,right_pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+ 2,0,0) 
-            self.controller.pwm.set_pwm(self.controller.channel+ 1,0,4095)
-            #front motor
-            self.controller.pwm.set_pwm(self.controller.channel+11,0,right_pulse)
+            #2nd L298N, Jetbot
+            self.controller.pwm.set_pwm(self.controller.channel+ 8,0,left_pulse)
             self.controller.pwm.set_pwm(self.controller.channel+ 9,0,4095)
             self.controller.pwm.set_pwm(self.controller.channel+10,0,0)
         else:
+            #front motor
+            #1st L298N, Motorhat B
+            self.controller.pwm.set_pwm(self.controller.channel+ 5,0,-left_pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+ 3,0,0)
+            self.controller.pwm.set_pwm(self.controller.channel+ 4,0,4095)       
+            #2nd L298N, Jetbot
+            self.controller.pwm.set_pwm(self.controller.channel+ 8,0,-left_pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+ 9,0,0)
+            self.controller.pwm.set_pwm(self.controller.channel+10,0,4095)           
+
+        if right_motor_speed > 0:
             #rear motor
+            #1st L298N, MotorHat A
+            self.controller.pwm.set_pwm(self.controller.channel+ 0,0,right_pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+ 1,0,4095)
+            self.controller.pwm.set_pwm(self.controller.channel+ 2,0,0) 
+            #2nd L298N, Jetbot
+            self.controller.pwm.set_pwm(self.controller.channel+13,0,right_pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+11,0,0) 
+            self.controller.pwm.set_pwm(self.controller.channel+12,0,4095)
+        else:
+            #front motor
+            #1st L298N, MotorHat A
             self.controller.pwm.set_pwm(self.controller.channel+ 0,0,-right_pulse)
             self.controller.pwm.set_pwm(self.controller.channel+ 1,0,0) 
             self.controller.pwm.set_pwm(self.controller.channel+ 2,0,4095)
-            #front motor
-            self.controller.pwm.set_pwm(self.controller.channel+11,0,-right_pulse)
-            self.controller.pwm.set_pwm(self.controller.channel+10,0,4095)
-            self.controller.pwm.set_pwm(self.controller.channel+ 9,0,0)
-
+            #2nd L298N, Jetbot
+            self.controller.pwm.set_pwm(self.controller.channel+13,0,-right_pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+11,0,4095)
+            self.controller.pwm.set_pwm(self.controller.channel+12,0,0) 
+            
+            
     def shutdown(self):
         self.run(0) #stop vehicle
