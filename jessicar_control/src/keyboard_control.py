@@ -28,13 +28,13 @@ class Vehicle(object):
             else:
                 self._steering = PCA9685(channel=0, address=i2caddr0, busnum=1)
             rospy.loginfo("Steering Controller Awaked!!") 
-
-            #Throttle with Motorhat
+            
             throttle_controller = PCA9685(channel=0, address=i2caddr1, busnum=1)
             if isDCSteer == 1:
-                self._throttle = PWMThrottleHat(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095) 
-            #Throttle with Jetracer
+                #Throttle with Motorhat
+                self._throttle = PWMThrottleHat(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)             
             else:
+                #Throttle with Jetracer
                 self._throttle = PWMThrottle(controller=throttle_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
             rospy.loginfo("Throttle Controller Awaked!!") 
             
