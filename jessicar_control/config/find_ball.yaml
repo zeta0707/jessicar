@@ -12,5 +12,5 @@ define: &red_min [0, 94, 92]
 define: &red_max [255, 255, 255]
 
 blob_detector:
-  blob_min: *green_min
-  blob_max: *green_max
+  blob_min: *pink_min
+  blob_max: *pink_max

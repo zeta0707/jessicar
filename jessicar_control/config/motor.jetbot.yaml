@@ -1,7 +1,7 @@
 define: &motorPins [0]
 
-steer_center : 380
-steer_limit : 100
+steer_center : 0
+steer_limit : 4095
 steer_dir : -1
 speed_center: 0
 speed_limit: 4095
