@@ -1,9 +1,8 @@
-# ROS1 Donkey(제시카)
+# Jessicar I 
 
-## RCCar with ROS Molodic + Donkeycar!!
+## RCCar with ROS Molodic + OpenCV + Yolo4-tiny
 
-로드밸런스팀 김수영씨 아래 코드를 가져와서 수정해서 만들었습니다.   
-https://github.com/Road-Balance/donkey_ros
+Base code: https://github.com/Road-Balance/donkey_ros      
 
 <p align="center">
     <img src="./Images/joy_control.gif" width="400" />
@@ -12,19 +11,18 @@ https://github.com/Road-Balance/donkey_ros
     <img src="./Images/yolo_control.gif" width="400" />
 </p>
 
-There's Notion Lecture Notes and Youtube video's about this project. 
-But, It's written in Korean. Anyway, Here's the link
+There's Notion Lecture Notes but, It's written in Korean. 
+Anyway, Here's the link
 
-* [Notion Lecture Notes] https://www.notion.so/38a82d8f3f464a22933eef95b8a29fa4
-
+* [Notion Lecture Notes] https://zeta7.notion.site/JessiCar-1449b3fd5c984bab816920cb2b92002d
 
 ## Tested System information
 
-**Jetson Nano 4GB + IMX219 160**
-
+**Jetson Nano 4GB or 2GB + IMX219 160 CSI camera**
+* Jetpack 4.5.1 or 4.6.1
 * Ubuntu 18.04
 * ROS Melodic
-* Opencv4
+* Opencv3.4.6 downgrade for darknet_ros
 
 ## Packages with Brief Explanation
 
@@ -46,18 +44,28 @@ Clone these Repo
 ```bash
 $ cd ~/catkin_ws/src
 
-Keyboard teleop   
-$ git clone https://github.com/ros-teleop/teleop_twist_keyboard.git   
-
 Jessicar project code   
 $ git clone https://github.com/zeta0707/jessicar.git   
 
-Custom Yolo4 train    
-$ git clone https://github.com/zeta0707/darknet_ros_custom.git
-
-git clone https://github.com/ros-drivers/gscam.git
+darknet_ros
 git clone --recursive https://github.com/Tossy0423/yolov4-for-darknet_ros.git
 
+Custom Yolo4 train result       
+$ git clone https://github.com/zeta0707/darknet_ros_custom.git
+
+```
+
+# Run script for selecting RCcar type
+```bash
+Usage: src/jessicar/script/jetRccarParam.sh target   
+target: select one among these   
+jetracer, jetbot, motorhat2wheel, motorhatSteer, nuriBldc, 298n2Wheel   
+```
+
+if you select waveshare jetracer
+```bash
+$ cd ~/catkin_ws/src/jessicar/script
+$ ./jetRccarParam.sh jetracer
 ```
 
 ## Usage
@@ -71,20 +79,11 @@ Packages for Image Streaming
 ```bash
 gst-launch-1.0 nvarguscamerasrc sensor_id=0 ! \
    'video/x-raw(memory:NVMM),width=3280, height=2464, framerate=21/1, format=NV12' ! \
-   nvvidconv flip-method=2 ! 'video/x-raw,width=960, height=720' ! \
+   nvvidconv flip-method=0 ! 'video/x-raw,width=960, height=720' ! \
    nvvidconv ! nvegltransform ! nveglglessink -e
 ```
 
 * `sensor_id` : this value depends on Camera Slot in Jetson Nano.
-
-### Webcam Puslish
-
-```bash
-$ roscore
-
-$ rosrun jessicar_camera webcam_pub.py
-$ rosrun image_view image_view image:=/csi_image
-```
 
 ### CSI Camera Publish
 
@@ -104,26 +103,24 @@ There's four modes for controlling RC Car
 
 * JoyStick Control
 * Keyboard Control
-* Blob Control
-* Yolo4 Control
+* Blob, Yolo4 Control
 
 ```bash
 $ roscore
 
 $ rosrun jessicar_control joy_control.py
+$ rosrun jessicar_control keyboard_control.py
 $ rosrun jessicar_control blob_chase.py
 ```
 
 3. jessicar_joy package
 
-There's two modes for using joystick
+There's two modes for using joystick -- delete Button mode
 
-* Button mode
 * Axes mode
 
 ```bash
 $ roslaunch jessicar_joy joy_teleop_axes.launch
-$ roslaunch jessicar_joy joy_teleop_btns.launch
 ```
 
 4. jessicar_cv package
@@ -150,15 +147,8 @@ Control RC Car with game controller
 </p>
 
 ```bash
-$ roscore
-
 # Jetson
-$ rosrun jessicar_control joy_control.py
-
-# Laptop or Jetson
-$ roslaunch jessicar_joy joy_teleop_axes.launch
-# or
-$ roslaunch jessicar_joy joy_teleop_btns.launch
+$ roslaunch jessicar_joy joy_teleop_axes_jetson.launch
 
 ```
 
@@ -171,13 +161,11 @@ Control RC Car with keyboard
 </p>
 
 ```bash
-$ roscore
+# Jetson
+$ roslaunch jessicar_control teleop_keyboard.launch
 
 # Jetson
-$ rosrun teleop_twist_keyboard teleop_twist_keyboard.py
-
-# Laptop or Jetson
-$ roslaunch jessicar_joy joy_teleop_axes.launch
+$ roslaunch jessicar_teleop jessicar_teleop_key.launch
 
 ```
 
@@ -192,17 +180,14 @@ Find the any color box of the Jetson Nano on the screen and change the direction
 
 
 ```bash
-$ roscore
-
-$ rosrun jessicar_camera csi_pub.py
-$ rosrun jessicar_cv find_ball.py 
-$ rosrun jessicar_control chase_the_ball.py 
-$ rosrun jessicar_control blob_chase.py 
+# Jetson
+$ roslaunch jessicar_control blob_control.launch
 ```
 
 Debugging with `image_view`
 
 ```bash
+# Jetson, but PC is better
 rosrun image_view image_view image:=/webcam_image
 rosrun image_view image_view image:=/blob/image_mask
 rosrun image_view image_view image:=/blob/image_blob
@@ -220,13 +205,26 @@ Find the object of the Jetson Nano on the screen and change the direction of the
 
 ```bash
 #terminal #1
-# camera image publish
-zeta@zeta-nano:~/catkin_ws$ roslaunch jetson_csi_cam jetson_csi_cam.launch width:=416 height:=416 fps:=15
-
-#terminal #2
-#object detect using Yolo_v4
+# object detect using Yolo_v4
 zeta@zeta-nano:~/catkin_ws$ roslaunch darknet_ros yolo_v4.launch
 
-#terminal #3
+#terminal #2
+# camera publish, object x/y -> car move
 zeta@zeta-nano:~/catkin_ws$ roslaunch jessicar_control yolo_chase.launch
+
+```
+
+### **5. Yolo4 traffic signal**
+
+Train traffic signal, then Jetson nano will react to the traffic signal
+
+
+```bash
+#terminal #1
+# object detect using Yolo_v4
+zeta@zeta-nano:~/catkin_ws$ roslaunch darknet_ros yolo_v4_jessicar.launch
+
+#terminal #2
+# camera publish, object -> start, stop, turn left, turn left
+zeta@zeta-nano:~/catkin_ws$ roslaunch jessicar_control yolo_gostop.launch
 ```
