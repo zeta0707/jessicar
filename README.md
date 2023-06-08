@@ -55,7 +55,7 @@ $ git clone https://github.com/zeta0707/darknet_ros_custom.git
 
 ```
 
-# Run script for selecting RCcar type
+## Run script for selecting RCcar type
 ```bash
 Usage: src/jessicar/script/jetRccarParam.sh target   
 target: select one among these   
@@ -70,12 +70,13 @@ $ ./jetRccarParam.sh jetracer
 
 ## Usage
 
-1. jessicar_camera package
+### 1. **jessicar_camera package**
 
 Packages for Image Streaming
 
 > Check Camera Connection First!!!
 
+**Using Gstreamer**
 ```bash
 gst-launch-1.0 nvarguscamerasrc sensor_id=0 ! \
    'video/x-raw(memory:NVMM),width=3280, height=2464, framerate=21/1, format=NV12' ! \
@@ -85,7 +86,7 @@ gst-launch-1.0 nvarguscamerasrc sensor_id=0 ! \
 
 * `sensor_id` : this value depends on Camera Slot in Jetson Nano.
 
-### CSI Camera Publish
+**Using ROS python**
 
 ```bash
 $ roscore
@@ -94,7 +95,7 @@ $ rosrun jessicar_camera csi_pub.py
 $ rosrun image_view image_view image:=/csi_image
 ```
 
-2. jessicar_control package
+### 2. **jessicar_control package**
 
 Packages for controlling `RC Car` with `PCA9685` PWM driver.
 You need to install `Adafruit_PCA9685` python package first 
@@ -113,7 +114,7 @@ $ rosrun jessicar_control keyboard_control.py
 $ rosrun jessicar_control blob_chase.py
 ```
 
-3. jessicar_joy package
+### 3. **jessicar_joy package**
 
 There's two modes for using joystick -- delete Button mode
 
@@ -123,7 +124,7 @@ There's two modes for using joystick -- delete Button mode
 $ roslaunch jessicar_joy joy_teleop_axes.launch
 ```
 
-4. jessicar_cv package
+### 4. **jessicar_cv package**
 
 Packages for OpenCV applications
 
