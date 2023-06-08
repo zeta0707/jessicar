@@ -19,7 +19,7 @@ class Vehicle(object):
             #Steer with DC motor driver 
             if isDCSteer == 1:
                 steer_controller = PCA9685(channel=0, address=i2caddr0, busnum=1)
-                self._steering = PWMSteering(controller=steering_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
+                self._steering = PWMSteering(controller=steer_controller, max_pulse=4095, zero_pulse=0, min_pulse=-4095)
             #Steer with servo motor
             else:
                 self._steering = PCA9685(channel=0, address=i2caddr0, busnum=1)
