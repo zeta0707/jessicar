@@ -154,13 +154,13 @@ class PWMThrottleHat:
         pulse = int(throttle)
         if throttle > 0:   
             # MotorHat B
-            self.controller.pwm.set_pwm(self.controller.channel+ 5,0,left_pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+ 5,0,pulse)
             self.controller.pwm.set_pwm(self.controller.channel+ 4,0,0)
             self.controller.pwm.set_pwm(self.controller.channel+ 3,0,4095)
 
         else:
             # MotorHat B
-            self.controller.pwm.set_pwm(self.controller.channel+ 5,0,-left_pulse)
+            self.controller.pwm.set_pwm(self.controller.channel+ 5,0,-pulse)
             self.controller.pwm.set_pwm(self.controller.channel+ 4,0,4095)
             self.controller.pwm.set_pwm(self.controller.channel+ 3,0,0)
 
