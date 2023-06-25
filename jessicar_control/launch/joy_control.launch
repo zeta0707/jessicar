@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="jessicar_control" type="joy_control.py" name="joy_control" output="screen" />
+    <rosparam command="load" file="$(find jessicar_control)/config/motor.yaml" />
+</launch>

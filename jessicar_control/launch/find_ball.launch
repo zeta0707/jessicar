@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="jessicar_cv" type="find_ball.py" name="blob_detector" />
+    <rosparam command="load" file="$(find jessicar_control)/config/find_ball.yaml" />
+</launch>

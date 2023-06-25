@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="jessicar_control" type="blob_chase.py" name="blob_chase" />
+     <rosparam command="load" file="$(find jessicar_control)/config/motor.yaml" />
+</launch>

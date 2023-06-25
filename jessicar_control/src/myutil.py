@@ -73,14 +73,13 @@ class PWMSteering:
         self.zero_pulse = zero_pulse
 
         #send zero pulse to calibrate ESC
-        print("Init Steer ESC")
+        print("Init Steering ESC")
         self.controller.set_pulse(self.zero_pulse)
         time.sleep(1)
 
 
     def run(self, steering):
         pulse = int(steering)
-        print("steer : " + str(steering))
         if steering > 0:
             #Motorhat A
             self.controller.pwm.set_pwm(self.controller.channel,0,pulse)
@@ -94,7 +93,7 @@ class PWMSteering:
     def shutdown(self):
         self.run(0) #stop vehicle
 
-class PWMThrottle:
+class PWMThrottleRacer:
     """
     Wrapper over a PWM motor cotnroller to convert -1 to 1 throttle
     values to PWM pulses.
