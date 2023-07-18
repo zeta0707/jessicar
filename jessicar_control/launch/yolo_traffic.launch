@@ -1,3 +1,4 @@
 <launch>
   <node pkg="jessicar_control" type="chase_gostop_yolo.py" name="chase_gostop" />
+     <rosparam command="load" file="$(find jessicar_control)/config/motor.yaml" />
 </launch>
