@@ -1,4 +1,3 @@
-<launch>
   <rosparam command="load" file="$(find jessicar_control)/config/motor.yaml" />
   <rosparam command="load" file="$(find jessicar_control)/config/find_ball.yaml" />
   <rosparam command="load" file="$(find jessicar_control)/config/yolo_jessicar.yaml" />
@@ -6,4 +5,3 @@
   <node pkg="jessicar_camera" type="csi_pub.py" name="csi_pub" />
   <node pkg="jessicar_control" type="chase_object_yolo.py" name="chase_object" />
   <node pkg="jessicar_control" type="blob_chase.py" name="blob_chase" />
-</launch>

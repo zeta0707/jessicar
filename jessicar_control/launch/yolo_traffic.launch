@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="jessicar_control" type="chase_gostop_yolo.py" name="chase_gostop" />
+</launch>

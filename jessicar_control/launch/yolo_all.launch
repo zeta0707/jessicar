@@ -1,6 +1,5 @@
 <launch>
   <include file="$(find jessicar_camera)/launch/csicam.launch" />
-  <include file="$(find jessicar_cv)/launch/blob_detect.launch" />
-  <include file="$(find jessicar_control)/launch/chase_the_ball.launch" />
+  <include file="$(find jessicar_control)/launch/yolo_chase.launch" />
   <include file="$(find jessicar_control)/launch/blob_chase.launch" />
 </launch>

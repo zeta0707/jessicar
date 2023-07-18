@@ -1,0 +1,6 @@
+<launch>
+  <!-- hostname:8080 -->
+  <node pkg="web_video_server" type="web_video_server" name="web_video_server" output="screen"/>
+  <node pkg="jessicar_camera" type="csi_pub.py" name="csi_pub" output="screen" />
+
+</launch>

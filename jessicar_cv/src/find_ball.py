@@ -61,12 +61,8 @@ class BlobDetector:
         self.blob_pub  = rospy.Publisher("/blob/point_blob",Point,queue_size=1)
 
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("/csi_image",Image,self.callback)
-        print ("<< Subscribed to topic /csi_image")
-
-        # TODO: switch btw webcam/csi by launch file
-        # self.image_sub = rospy.Subscriber("/webcam_image",Image,self.callback)
-        # print ("<< Subscribed to topic /webcam_image")
+        self.image_sub = rospy.Subscriber("/image_raw",Image,self.callback)
+        print ("<< Subscribed to topic /image_raw")
         
     def set_threshold(self, thr_min, thr_max):
         self._threshold = [thr_min, thr_max]

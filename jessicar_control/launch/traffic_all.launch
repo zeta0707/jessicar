@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find jessicar_camera)/launch/csicam.launch" />
+  <include file="$(find jessicar_control)/launch/yolo_traffic.launch" />
+</launch>

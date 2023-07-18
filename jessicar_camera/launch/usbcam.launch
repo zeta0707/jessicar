@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="jessicar_camera" type="csi_pub.py" name="csi_pub" output="screen" />
+</launch>

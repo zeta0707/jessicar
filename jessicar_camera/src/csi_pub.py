@@ -38,7 +38,7 @@ def gstreamer_pipeline(
 cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
 
 rospy.init_node("csi_pub", anonymous=True)
-image_pub = rospy.Publisher("csi_image", Image, queue_size=1)
+image_pub = rospy.Publisher("image_raw", Image, queue_size=1)
 
 bridge = CvBridge()
 

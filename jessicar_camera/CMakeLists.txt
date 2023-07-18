@@ -14,7 +14,6 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   image_transport
   rospy
-  roscpp
   sensor_msgs
   std_msgs
 )
@@ -110,12 +109,12 @@ find_package( OpenCV REQUIRED )
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES jessicar_camera
-  CATKIN_DEPENDS cv_bridge image_transport rospy roscpp sensor_msgs std_msgs
+#catkin_package(
+#  INCLUDE_DIRS include
+#  LIBRARIES jessicar_camera
+#  CATKIN_DEPENDS cv_bridge image_transport rospy roscpp sensor_msgs std_msgs
   # DEPENDS system_lib
-)
+#)
 
 ###########
 ## Build ##
@@ -123,11 +122,11 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
-  ${OpenCV_INCLUDE_DIRS} 
-)
+#include_directories(
+#  include
+#  ${catkin_INCLUDE_DIRS}
+#  ${OpenCV_INCLUDE_DIRS} 
+#)
 
 
 ## Declare a C++ library
@@ -144,8 +143,8 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(webcam_pub_node src/webcam_pub.cpp)
-add_executable(cpp_webcam_pub src/webcam_pub.cpp)
-add_executable(raw_webcam src/raw_webcam.cpp)
+#add_executable(cpp_webcam_pub src/webcam_pub.cpp)
+#add_executable(raw_webcam src/raw_webcam.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -156,20 +155,20 @@ add_executable(raw_webcam src/raw_webcam.cpp)
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(webcam_pub_node ${webcam_pub_node_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(cpp_webcam_pub ${cpp_webcam_pub_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(raw_webcam ${raw_webcam_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(cpp_webcam_pub ${cpp_webcam_pub_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(raw_webcam ${raw_webcam_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(webcam_pub_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(cpp_webcam_pub
-  ${catkin_LIBRARIES}
-  ${OpenCV_LIBS}
-)
-target_link_libraries(raw_webcam
-  ${OpenCV_LIBS}
-)
+#target_link_libraries(cpp_webcam_pub
+#  ${catkin_LIBRARIES}
+#  ${OpenCV_LIBS}
+#)
+#target_link_libraries(raw_webcam
+#  ${OpenCV_LIBS}
+#)
 
 
 #############
