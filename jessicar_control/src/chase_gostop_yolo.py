@@ -56,11 +56,11 @@ class ChaseObject:
             #
             #yolov4-tiny, 416x416
             if box.Class == "left":
-                self.blob_x = 0.5
-                self.blob_y = 1.0
-            elif box.Class == "right":
                 self.blob_x = -0.5
-                self.blob_y = 1.0
+                self.blob_y = 0.0
+            elif box.Class == "right":
+                self.blob_x = 0.5
+                self.blob_y = 0.0
             elif box.Class == "go":    
                 self.blob_x = 0.0
                 self.blob_y = 1.0
@@ -69,7 +69,7 @@ class ChaseObject:
                 self.blob_y = 0.0
 
             self._time_detected = time.time()
-            #rospy.loginfo("object detected: %.2f  %.2f "%(self.blob_x, self.blob_y))
+            rospy.loginfo("object detected: %.2f  %.2f "%(self.blob_x, self.blob_y))
             rospy.loginfo(
                     "Xmin: {}, Xmax: {} Ymin: {}, Ymax: {} Class: {}".format
                     (box.xmin, box.xmax, box.ymin, box.ymax, box.Class) )
@@ -87,10 +87,10 @@ class ChaseObject:
             # --- Apply steering, proportional to how close is the object
             steer_action = K_LAT_DIST_TO_STEER * self.blob_x
             steer_action = saturate(steer_action, -1.5, 1.5)   
-            rospy.loginfo("BlobX %.2f" % self.blob_x)         
+            #rospy.loginfo("BlobX %.2f" % self.blob_x)         
             
             #if object is detected, go forward with defined power
-            throttle_action = K_LAT_DIST_TO_THROTTLE
+            throttle_action = K_LAT_DIST_TO_THROTTLE  * self.blob_y
             rospy.loginfo("is _detected, Steering = %3.1f Throttle = %3.1f" % (steer_action, throttle_action))
 
         return (steer_action)

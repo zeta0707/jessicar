@@ -1,4 +1,4 @@
 <launch>
-  <node pkg="jessicar_control" type="chase_object_yolo.py" name="chase_object" />
+  <node pkg="jessicar_control" type="chase_object_yolo.py" name="chase_object" output="screen" />
     <rosparam command="load" file="$(find jessicar_control)/config/yolo_jessicar.yaml" />
 </launch>
