@@ -7,7 +7,7 @@ Base code: https://github.com/Road-Balance/donkey_ros
 There's Notion Lecture Notes but, It's written in Korean. 
 Anyway, Here's the link
 
-* [Notion Lecture Notes] https://zeta7.notion.site/JessiCar-1449b3fd5c984bab816920cb2b92002d
+* [Notion Lecture Notes] https://www.notion.so/zeta7/JessiCar-1449b3fd5c984bab816920cb2b92002d
 
 ## Tested System information
 
@@ -61,6 +61,19 @@ $ cd ~/catkin_ws/src/jessicar/script
 $ ./jetRccarParam.sh jetracer
 ```
 
+## Run script for selecting camera type
+```bash
+Usage: ./camSelect.sh target
+target: select one between these
+csicam, usbcam
+```
+
+if you select waveshare usbcam
+```bash
+$ cd ~/catkin_ws/src/jessicar/script
+$ ./camSelect.sh usbcam
+```
+
 ## Usage
 
 ### 1. **jessicar_camera package**
@@ -82,10 +95,13 @@ gst-launch-1.0 nvarguscamerasrc sensor_id=0 ! \
 **Using ROS python**
 
 ```bash
-$ roscore
+# terminal #1
+$ roslaunch jessicar_camera csicam.launch
+# or
+$ roslaunch jessicar_camera usbcam.launch
 
-$ rosrun jessicar_camera csi_pub.py
-$ rosrun image_view image_view image:=/csi_image
+# terminal #2, PC or Jetson
+$ rqt_image_view
 ```
 
 ### 2. **jessicar_control package**
@@ -99,23 +115,12 @@ There's four modes for controlling RC Car
 * Keyboard Control
 * Blob, Yolo4 Control
 
-```bash
-$ roscore
-
-$ rosrun jessicar_control joy_control.py
-$ rosrun jessicar_control keyboard_control.py
-$ rosrun jessicar_control blob_chase.py
-```
-
 ### 3. **jessicar_joy package**
 
 There's two modes for using joystick -- delete Button mode
 
 * Axes mode
 
-```bash
-$ roslaunch jessicar_joy joy_teleop_axes.launch
-```
 
 ### 4. **jessicar_cv package**
 
@@ -124,11 +129,7 @@ Packages for OpenCV applications
 * Find Blob with Certain color
 * Publish Image location as a `geometry_msgs/Point`
 
-```bash
-$ roscore
 
-$ rosrun jessicar_cv find_ball.py
-```
 
 ## Application
 
@@ -141,8 +142,11 @@ Control RC Car with game controller
 </p>
 
 ```bash
-# Jetson
-$ roslaunch jessicar_joy joy_teleop_axes_jetson.launch
+#  terminal #1
+$ roslaunch jessicar_control joy_control.launch
+
+# terminal #2
+$ roslaunch jessicar_joy jessicar_teleop_joy.launch
 
 ```
 
@@ -155,10 +159,10 @@ Control RC Car with keyboard
 </p>
 
 ```bash
-# Jetson
-$ roslaunch jessicar_control teleop_keyboard.launch
+# terminal #1
+$ roslaunch jessicar_control keyboard_control.launch
 
-# Jetson
+# terminal #2
 $ roslaunch jessicar_teleop jessicar_teleop_key.launch
 
 ```
@@ -175,14 +179,14 @@ Find the any color box of the Jetson Nano on the screen and change the direction
 
 ```bash
 # Jetson
-$ roslaunch jessicar_control blob_control.launch
+$ roslaunch jessicar_control blob_all.launch
 ```
 
 Debugging with `image_view`
 
 ```bash
 # Jetson, but PC is better
-rosrun image_view image_view image:=/webcam_image
+rosrun image_view image_view image:=/image_raw
 rosrun image_view image_view image:=/blob/image_mask
 rosrun image_view image_view image:=/blob/image_blob
 ```
@@ -199,12 +203,11 @@ Find the object of the Jetson Nano on the screen and change the direction of the
 
 ```bash
 #terminal #1
-# object detect using Yolo_v4
+#object detect using Yolo_v4
 zeta@zeta-nano:~/catkin_ws$ roslaunch darknet_ros yolo_v4.launch
 
-#terminal #2
-# camera publish, object x/y -> car move
-zeta@zeta-nano:~/catkin_ws$ roslaunch jessicar_control yolo_chase.launch
+#terminal #2, camera publish, object x/y -> car move
+zeta@zeta-nano:~/catkin_ws$ roslaunch jessicar_control yolo_chase.launch 
 
 ```
 
@@ -212,13 +215,14 @@ zeta@zeta-nano:~/catkin_ws$ roslaunch jessicar_control yolo_chase.launch
 
 Train traffic signal, then Jetson nano will react to the traffic signal
 
+<p align="center">
+    <img src="./Images/Yolo_traffic.gif" width="500" />
+</p>
 
 ```bash
-#terminal #1
-# object detect using Yolo_v4
-zeta@zeta-nano:~/catkin_ws$ roslaunch darknet_ros yolo_v4_jessicar.launch
+#terminal #1, #object detect using Yolo_v4
+zeta@zeta-nano:~/catkin_ws$ roslaunch darknet_ros yolov4_jessicar.launch
 
-#terminal #2
-# camera publish, object -> start, stop, turn left, turn left
-zeta@zeta-nano:~/catkin_ws$ roslaunch jessicar_control yolo_gostop.launch
+#terminal #2,camera publish, object -> start or stop
+zeta@zeta-nano:~/catkin_ws$ roslaunch jessicar_control traffic_all.launch
 ```

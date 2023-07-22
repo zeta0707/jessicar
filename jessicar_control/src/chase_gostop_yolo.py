@@ -57,10 +57,10 @@ class ChaseObject:
             #yolov4-tiny, 416x416
             if box.Class == "left":
                 self.blob_x = -0.5
-                self.blob_y = 0.0
+                self.blob_y = 0.5
             elif box.Class == "right":
                 self.blob_x = 0.5
-                self.blob_y = 0.0
+                self.blob_y = 0.5
             elif box.Class == "go":    
                 self.blob_x = 0.0
                 self.blob_y = 1.0

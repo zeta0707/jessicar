@@ -1,5 +1,7 @@
-roslaunch jessicar_control blob_control.launch
+#terminal #1
+roslaunch jessicar_control blob_all.launch
 
-rosrun jessicar_control blob_chase.py
-
-rosrun image_view image_view image:=/blob/image_blob
+#terminal #2
+$ rosrun image_view image_view image:=/blob/image_blob
+# or
+$ rqt_image_view
