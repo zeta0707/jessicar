@@ -68,7 +68,7 @@ target: select one between these
 csicam, usbcam
 ```
 
-if you select waveshare usbcam
+if you select usbcam
 ```bash
 $ cd ~/catkin_ws/src/jessicar/script
 $ ./camSelect.sh usbcam
@@ -113,7 +113,9 @@ There's four modes for controlling RC Car
 
 * JoyStick Control
 * Keyboard Control
-* Blob, Yolo4 Control
+* Blob Tracking
+* Yolo4 object tracking
+* Yolov4 traffic sign react
 
 ### 3. **jessicar_joy package**
 
